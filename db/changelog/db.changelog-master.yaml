@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - includeAll:
+      path: db/changelog/ddl/
+      relativeToChangelogFile: false
+  - includeAll:
+      path: db/changelog/dml/
+      relativeToChangelogFile: false

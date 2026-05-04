@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: mgbd_postgres
+    environment:
+      POSTGRES_DB:       mgbd_db
+      POSTGRES_USER:     mgbd_user
+      POSTGRES_PASSWORD: mgbd_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mgbd_user -d mgbd_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  liquibase:
+    image: liquibase/liquibase:4.27
+    container_name: mgbd_liquibase
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./db:/liquibase/changelog
+    command: >
+      --url=jdbc:postgresql://postgres:5432/mgbd_db
+      --username=mgbd_user
+      --password=mgbd_pass
+      --changeLogFile=changelog/db.changelog-master.yaml
+      update
+
+volumes:
+  postgres_data:
